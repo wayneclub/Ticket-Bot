@@ -4,59 +4,18 @@
 """
 This module is to download subtitle from stream services.
 """
+import os
+import sys
 import argparse
-from base64 import b64encode
 import logging
 from logging import INFO, DEBUG
 from datetime import datetime
-import ssl
 from services import service_map
 from configs.config import config, app_name, filenames, __version__
-import os
-import sys
-import requests
-from bs4 import BeautifulSoup
 from utils.io import load_toml
 
-user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36"
-
-def ocr_captcha(img_url):
-    headers = {
-        "User-Agent": user_agent,
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    }
-
-    res = requests.get(img_url, headers=headers, timeout=120)
-    if res.ok:
-        base64_str = b64encode(res.content).decode("utf-8")
-
-        base64_str=base64_str.replace('+', '-').replace('/', '_').replace('=', '')
-
-        url = 'https://ocr.holey.cc/thsrc'
-        base64_str = base64_str.replace('+', '-').replace('\/', '_').replace('=+', '')
-        data = {'base64_str': base64_str}
-        res = requests.post(url, json=data, timeout=5)
-        if res.ok:
-            return res.json()['data']
-        else:
-            print(res.text)
-    else:
-        print(res.text)
-
-class TLSAdapter(requests.adapters.HTTPAdapter):
-    """
-    Fix openssl issue
-    """
-
-    def init_poolmanager(self, *args, **kwargs):
-        ctx = ssl.create_default_context()
-        ctx.set_ciphers('DEFAULT@SECLEVEL=1')
-        kwargs['ssl_context'] = ctx
-        return super(TLSAdapter, self).init_poolmanager(*args, **kwargs)
-
-
-
 def main() -> None:
+    """args command"""
 
     support_services = ', '.join(sorted((service['name'] for service in service_map), key=str.lower))
 

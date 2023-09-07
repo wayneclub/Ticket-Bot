@@ -7,7 +7,6 @@ This module is for I/O.
 
 from __future__ import annotations
 import logging
-import os
 from typing import Union
 from pathlib import Path
 import rtoml

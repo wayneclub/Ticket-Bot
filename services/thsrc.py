@@ -5,14 +5,12 @@
 This module is to buy tickets form THSRC
 """
 
+from __future__ import annotations
 import base64
-from enum import Enum
-import os
 import re
 import sys
-import time
-from bs4 import BeautifulSoup
 from datetime import date, timedelta
+from bs4 import BeautifulSoup
 from services.base_service import BaseService
 from configs.config import user_agent
 

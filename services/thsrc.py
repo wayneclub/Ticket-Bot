@@ -175,14 +175,14 @@ class THSRC(BaseService):
 
     def ocr_captcha(self, img_url):
         """OCR captcha"""
-        res = self.session.get(img_url, timeout=120)
+        res = self.session.get(img_url, timeout=10)
         if res.ok:
             base64_str = base64.b64encode(res.content).decode("utf-8")
             base64_str=base64_str.replace('+', '-').replace('/', '_').replace('=', '')
 
             data = {'base64_str': base64_str}
 
-            res = self.session.post(self.config['api']['captcha_ocr'], json=data, timeout=5)
+            res = self.session.post(self.config['api']['captcha_ocr'], json=data, timeout=10)
             if res.ok:
                 return res.json()['data']
             else:

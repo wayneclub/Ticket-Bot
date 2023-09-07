@@ -29,19 +29,19 @@ class BaseService(object):
         self.locale = args.locale
 
         self.session = requests.Session()
-        # self.session.mount('https://', TLSAdapter())
+        self.session.mount('https://', TLSAdapter(max_retries=5))
         self.session.headers = {
             'User-Agent': user_agent,
             "Accept": 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
             "Accept-Language": 'zh-TW,zh;q=0.8,en-US;q=0.5,en;q=0.3',
         }
 
-        self.ip_info = get_ip_info()
-        self.logger.info(
-            'ip: %s (%s)', self.ip_info['ip'], self.ip_info['country'])
-
         proxy = args.proxy
         if proxy:
+            self.ip_info = get_ip_info()
+            self.logger.info(
+                'ip: %s (%s)', self.ip_info['ip'], self.ip_info['country'])
+
             if len("".join(i for i in proxy if not i.isdigit())) == 2:  # e.g. ie, ie12, us1356
                 proxy = get_proxy(region=proxy, ip_info=self.ip_info,
                                   geofence=self.GEOFENCE, platform=self.platform)

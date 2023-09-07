@@ -1,0 +1,79 @@
+max-ticket-num = 10
+
+available-timetable = [
+    '1201A',
+    '1230A',
+    '600A',
+    '630A',
+    '700A',
+    '730A',
+    '800A',
+    '830A',
+    '900A',
+    '930A',
+    '1000A',
+    '1030A',
+    '1100A',
+    '1130A',
+    '1200N',
+    '1230P',
+    '100P',
+    '130P',
+    '200P',
+    '230P',
+    '300P',
+    '330P',
+    '400P',
+    '430P',
+    '500P',
+    '530P',
+    '600P',
+    '630P',
+    '700P',
+    '730P',
+    '800P',
+    '830P',
+    '900P',
+    '930P',
+    '1000P',
+    '1030P',
+    '1100P',
+    '1130P',
+]
+
+[api]
+captcha_ocr = 'https://ocr.holey.cc/thsrc'
+reservation = 'https://irs.thsrc.com.tw/IMINT/'
+confirm_train = 'https://irs.thsrc.com.tw/IMINT/;jsessionid={jsessionid}?wicket:interface=:0:BookingS1Form::IFormSubmitListener'
+confirm_ticket = 'https://irs.thsrc.com.tw/IMINT/?wicket:interface=:1:BookingS2Form::IFormSubmitListener'
+submit = 'https://irs.thsrc.com.tw/IMINT/?wicket:interface=:2:BookingS3Form::IFormSubmitListener'
+
+[station]
+Nangang = 1
+Taipei = 2
+Banqiao = 3
+Taoyuan = 4
+Hsinchu = 5
+Miaoli = 6
+Taichung = 7
+Changhua = 8
+Yunlin = 9
+Chiayi = 10
+Tainan = 11
+Zuouing = 12
+
+[ticket-type]
+adult = 'F'
+child = 'H'
+disabled = 'W'
+elder = 'E'
+college = 'P'
+
+[train-class]
+normal = 0
+business = 1
+
+[preferred-seat]
+none = 0
+window = 1
+aisle = 2

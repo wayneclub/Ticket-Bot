@@ -1,0 +1,13 @@
+.DS_Store
+__pycache__/
+__tmp__/
+logs/
+*.pyc
+*.log
+cookies/*_cookies.txt
+*.zip
+*.html
+test.py
+.vscode/
+raw.json
+test.json

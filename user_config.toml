@@ -1,0 +1,47 @@
+# This is an example Ticket Bot's config file.
+
+# Copy user-agent from login browser (https://www.whatsmyua.info/)
+[headers]
+User-Agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36'
+
+[directories]
+
+[fields]
+
+[fields.THSRC]
+id = ''
+start-station = ''
+dest-station = ''
+outbound-date = ''
+outbound-time = ''
+inbound-time = ''
+preferred-seat = ''
+train-class = ''
+train-no = ''
+email = ''
+phone = ''
+tgo-id = ''
+
+[fields.THSRC.ticket]
+adult = 1
+elder = 0
+child = 0
+disabled = 0
+college = 0
+
+[proxies]
+# This is a dictionary of proxies you wish to use on services that require a specific country IP.
+# The dictionary key needs to be an alpha 2 country code (2-letter code, e.g. `us`, `gb`, `jp`, `de`).
+# The value needs to be the proxy string which should be recognizable by python-requests and curl.
+# e.g.: https://username:password123@subdomain.hostname.ext:89
+# If you don't want any, just have this section blank or remove the [proxies] entirely
+# us = 'http://127.0.0.1:7890' # Clash
+
+[nordvpn]
+# Like `proxies` above, this does the same thing except it automatically generates a proxy string
+# for a nordvpn server automatically.
+# The credentials should be `Service credentials` NOT your Nord account details!
+# https://my.nordaccount.com/dashboard/nordvpn/ (Under advanced configuration).
+# ex: https://support.nordvpn.com/Connectivity/Proxy/1087802472/Proxy-setup-on-qBittorrent.htm
+username = ''
+password = ''

@@ -208,8 +208,8 @@ class THSRC(BaseService):
         if res.ok:
             page = BeautifulSoup(res.text, 'html.parser')
             captcha_url = 'https://irs.thsrc.com.tw' + page.find('img', class_='captcha-img')['src']
-            self.logger.debug("captcha url: %s", captcha_url)
             security_code = self.ocr_captcha(captcha_url)
+            self.logger.info("+ Security code: %s", security_code)
             jsessionid = res.cookies.get_dict()['JSESSIONID']
             return security_code, jsessionid
         else:
@@ -219,7 +219,6 @@ class THSRC(BaseService):
     def booking_form(self):
         """1. Fill booking form"""
         security_code, jsessionid = self.get_security_code()
-        self.logger.debug('security code: %s', security_code)
         if not security_code and not jsessionid:
             security_code, jsessionid = self.get_security_code()
 

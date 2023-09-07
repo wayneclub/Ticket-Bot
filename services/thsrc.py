@@ -395,10 +395,10 @@ class THSRC(BaseService):
         """4. Show result"""
 
         result_page = BeautifulSoup(html_page, 'html.parser')
-        reservation_no = result_page.find('p', class_='pnr-code').text
-        payment_deadline = result_page.find('p', class_='payment-status').text
+        reservation_no = result_page.find('p', class_='pnr-code').get_text(strip=True)
+        payment_deadline = result_page.find('p', class_='payment-status').get_text(strip=True)
         # ticket_num = result_page.find('p', class_='pnr-code').text
-        ticket_price = result_page.find('span', id='setTrainTotalPriceValue').text
+        ticket_price = result_page.find('span', id='setTrainTotalPriceValue').get_text(strip=True)
 
         self.logger.info("\nBooking success!")
         self.logger.info("\n\n----------- Ticket -----------")

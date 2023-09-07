@@ -24,7 +24,15 @@ class THSRC(BaseService):
     def __init__(self, args):
         super().__init__(args)
         # self._ = get_locale(__name__, self.locale)
-        self.ticket_num = 1
+        self.start_station = self.select_station('start', default_value=self.config['station']['Taipei'])
+        self.dest_station = self.select_station('dest', default_value=self.config['station']['Zuouing'])
+        self.outbound_date = self.select_date()
+        self.outbound_time = self.select_time()
+        self.ticket_num = self.select_ticket_num()
+        self.train_class = self.select_train_class()
+        self.preferred_seat = self.select_preferred_seat()
+
+        self.total = 1
 
     def print_error_message(self, html_page):
         """Print error messsage"""
@@ -32,7 +40,6 @@ class THSRC(BaseService):
         page = BeautifulSoup(html_page, 'html.parser')
         for error_text in page.find_all('span', class_='feedbackPanelERROR'):
             self.logger.error(error_text.text.strip())
-        sys.exit(1)
 
     def get_station(self, station_name):
         """Get station value"""
@@ -149,7 +156,7 @@ class THSRC(BaseService):
             tickets = [f"{default_value}{self.config['ticket-type']['adult']}", '', '', '']
             total = 1
 
-        self.ticket_num = total
+        self.total = total
 
         return tickets
 
@@ -175,14 +182,14 @@ class THSRC(BaseService):
 
     def ocr_captcha(self, img_url):
         """OCR captcha"""
-        res = self.session.get(img_url, timeout=10)
+        res = self.session.get(img_url, timeout=120)
         if res.ok:
             base64_str = base64.b64encode(res.content).decode("utf-8")
             base64_str=base64_str.replace('+', '-').replace('/', '_').replace('=', '')
 
             data = {'base64_str': base64_str}
 
-            res = self.session.post(self.config['api']['captcha_ocr'], json=data, timeout=10)
+            res = self.session.post(self.config['api']['captcha_ocr'], json=data, timeout=120)
             if res.ok:
                 return res.json()['data']
             else:
@@ -196,7 +203,7 @@ class THSRC(BaseService):
         """Get security code from captcha url"""
         self.logger.info("Loading...")
 
-        res = self.session.get(self.config['api']['reservation'], timeout=10, allow_redirects=True)
+        res = self.session.get(self.config['api']['reservation'], timeout=120, allow_redirects=True)
 
         if res.ok:
             page = BeautifulSoup(res.text, 'html.parser')
@@ -209,17 +216,12 @@ class THSRC(BaseService):
             self.logger.error(res.text)
             sys.exit(1)
 
-
-    def booking_form(self, security_code, jsessionid):
+    def booking_form(self):
         """1. Fill booking form"""
-
-        start_station = self.select_station('start', default_value=self.config['station']['Taipei'])
-        dest_station = self.select_station('dest', default_value=self.config['station']['Zuouing'])
-        outbound_date = self.select_date()
-        outbound_time = self.select_time()
-        ticket_num = self.select_ticket_num()
-        train_class = self.select_train_class()
-        preferred_seat = self.select_preferred_seat()
+        security_code, jsessionid = self.get_security_code()
+        self.logger.debug('security code: %s', security_code)
+        if not security_code and not jsessionid:
+            security_code, jsessionid = self.get_security_code()
 
         if self.fields['train-no']:
             booking_method = 'radio33'
@@ -235,21 +237,21 @@ class THSRC(BaseService):
         data = {
             'BookingS1Form:hf:0': '',
             'tripCon:typesoftrip': '0',
-            'trainCon:trainRadioGroup': train_class,
-            'seatCon:seatRadioGroup': preferred_seat,
+            'trainCon:trainRadioGroup': self.train_class,
+            'seatCon:seatRadioGroup': self.preferred_seat,
             'bookingMethod': booking_method,
-            'selectStartStation': start_station,
-            'selectDestinationStation': dest_station,
-            'toTimeInputField': outbound_date,
-            'backTimeInputField': outbound_date,
-            'toTimeTable': outbound_time,
+            'selectStartStation': self.start_station,
+            'selectDestinationStation': self.dest_station,
+            'toTimeInputField': self.outbound_date,
+            'backTimeInputField': self.outbound_date,
+            'toTimeTable': self.outbound_time,
             'toTrainIDInputField': '',
             'backTimeTable': '',
             'backTrainIDInputField': '',
-            'ticketPanel:rows:0:ticketAmount': ticket_num[0],
-            'ticketPanel:rows:1:ticketAmount': ticket_num[1],
-            'ticketPanel:rows:2:ticketAmount': ticket_num[2],
-            'ticketPanel:rows:3:ticketAmount': ticket_num[3],
+            'ticketPanel:rows:0:ticketAmount': self.ticket_num[0],
+            'ticketPanel:rows:1:ticketAmount': self.ticket_num[1],
+            'ticketPanel:rows:2:ticketAmount': self.ticket_num[2],
+            'ticketPanel:rows:3:ticketAmount': self.ticket_num[3],
             'homeCaptcha:securityCode': security_code,
             'SubmitButton': 'Search',
             'portalTag': 'false',
@@ -263,19 +265,15 @@ class THSRC(BaseService):
             form_url,
             headers=headers,
             data=data,
-            timeout=10,
+            timeout=120,
             allow_redirects=True
         )
 
         if res.ok:
-            if 'TrainQueryDataViewPanel' in res.text:
-                return res.text
-            else:
-                self.print_error_message(res.text)
+            return res.text
         else:
             self.logger.error(res.text)
             sys.exit(1)
-
 
     def confirm_train(self, html_page, default_value:int = 1):
         """2. Confirm train"""
@@ -318,20 +316,15 @@ class THSRC(BaseService):
             self.config['api']['confirm_ticket'],
             headers=headers,
             data=data,
-            timeout=10,
+            timeout=120,
             allow_redirects=True
         )
 
         if res.ok:
-            if 'dummyId' in res.text:
-                return res.text
-            else:
-                self.print_error_message(res.text)
+            return res.text
         else:
             self.logger.error(res.text)
             sys.exit(1)
-
-
 
     def confirm_ticket(self, html_page):
         """3. Confirm ticket"""
@@ -357,7 +350,7 @@ class THSRC(BaseService):
             'BookingS3FormSP:hf:0': '',
             'diffOver': '1',
             'isSPromotion': '1',
-            'passengerCount': self.ticket_num,
+            'passengerCount': self.total,
             'isGoBackM': '',
             'backHome': '',
             'TgoError': '1',
@@ -374,7 +367,7 @@ class THSRC(BaseService):
             self.config['api']['submit'],
             headers=headers,
             data=data,
-            timeout=10,
+            timeout=120,
             allow_redirects=True
         )
 
@@ -405,11 +398,28 @@ class THSRC(BaseService):
 
 
     def main(self):
-        security_code, jsessionid = self.get_security_code()
-        if not security_code and not jsessionid:
-            security_code, jsessionid = self.get_security_code()
+        error = True
+        while error:
+            confirm_train_page = self.booking_form()
+            if 'feedbackPanelERROR' not in confirm_train_page:
+                error = False
+            else:
+                self.print_error_message(confirm_train_page)
 
-        confirm_train_page = self.booking_form(security_code, jsessionid)
-        confirm_ticket_page = self.confirm_train(confirm_train_page)
-        result_page = self.confirm_ticket(confirm_ticket_page)
+        error = True
+        while error:
+            confirm_ticket_page = self.confirm_train(confirm_train_page)
+            if 'feedbackPanelERROR' not in confirm_ticket_page:
+                error = False
+            else:
+                self.print_error_message(confirm_ticket_page)
+
+        error = True
+        while error:
+            result_page = self.confirm_ticket(confirm_ticket_page)
+            if 'feedbackPanelERROR' not in result_page:
+                error = False
+            else:
+                self.print_error_message(result_page)
+
         self.show_result(result_page)

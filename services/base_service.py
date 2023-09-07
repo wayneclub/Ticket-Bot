@@ -29,7 +29,7 @@ class BaseService(object):
         self.locale = args.locale
 
         self.session = requests.Session()
-        self.session.mount('https://', TLSAdapter(max_retries=5))
+        # self.session.mount('https://', TLSAdapter(max_retries=5))
         self.session.headers = {
             'User-Agent': user_agent,
             "Accept": 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',

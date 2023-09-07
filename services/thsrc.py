@@ -223,8 +223,6 @@ class THSRC(BaseService):
         train_class = self.select_train_class()
         preferred_seat = self.select_preferred_seat()
 
-        print(outbound_date, outbound_time)
-
         if self.fields['train-no']:
             booking_method = 'radio33'
         else:

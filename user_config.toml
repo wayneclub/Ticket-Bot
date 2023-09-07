@@ -9,21 +9,34 @@ User-Agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36
 [fields]
 
 [fields.THSRC]
-id = ''
-start-station = ''
-dest-station = ''
-outbound-date = ''
-outbound-time = ''
+id = 'A123456789'
+start-station = '台北'
+dest-station = '台中'
+outbound-date = '2023-10-07'
+outbound-time = '09:30'
 inbound-time = ''
 preferred-seat = ''
 train-class = ''
 train-no = ''
-email = ''
+email = 'tinglongwei@gmail.com'
 phone = ''
-tgo-id = ''
+tgo-id = 'U120580883'
+
+# id = ''
+# start-station = ''
+# dest-station = ''
+# outbound-date = ''
+# outbound-time = ''
+# inbound-time = ''
+# preferred-seat = ''
+# train-class = ''
+# train-no = ''
+# email = ''
+# phone = ''
+# tgo-id = ''
 
 [fields.THSRC.ticket]
-adult = 1
+adult = 7
 elder = 0
 child = 0
 disabled = 0

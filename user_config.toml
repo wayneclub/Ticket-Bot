@@ -23,7 +23,7 @@ phone = ''
 tgo-id = ''
 
 [fields.THSRC.ticket]
-adult = 1
+adult = 7
 elder = 0
 child = 0
 disabled = 0

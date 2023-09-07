@@ -182,14 +182,14 @@ class THSRC(BaseService):
 
     def ocr_captcha(self, img_url):
         """OCR captcha"""
-        res = self.session.get(img_url, timeout=120)
+        res = self.session.get(img_url, timeout=200)
         if res.ok:
             base64_str = base64.b64encode(res.content).decode("utf-8")
             base64_str=base64_str.replace('+', '-').replace('/', '_').replace('=', '')
 
             data = {'base64_str': base64_str}
 
-            res = self.session.post(self.config['api']['captcha_ocr'], json=data, timeout=120)
+            res = self.session.post(self.config['api']['captcha_ocr'], json=data, timeout=200)
             if res.ok:
                 return res.json()['data']
             else:
@@ -203,7 +203,7 @@ class THSRC(BaseService):
         """Get security code from captcha url"""
         self.logger.info("Loading...")
 
-        res = self.session.get(self.config['api']['reservation'], timeout=120, allow_redirects=True)
+        res = self.session.get(self.config['api']['reservation'], timeout=200, allow_redirects=True)
 
         if res.ok:
             page = BeautifulSoup(res.text, 'html.parser')
@@ -264,7 +264,7 @@ class THSRC(BaseService):
             form_url,
             headers=headers,
             data=data,
-            timeout=120,
+            timeout=200,
             allow_redirects=True
         )
 
@@ -315,7 +315,7 @@ class THSRC(BaseService):
             self.config['api']['confirm_ticket'],
             headers=headers,
             data=data,
-            timeout=120,
+            timeout=200,
             allow_redirects=True
         )
 
@@ -366,7 +366,7 @@ class THSRC(BaseService):
             self.config['api']['submit'],
             headers=headers,
             data=data,
-            timeout=120,
+            timeout=200,
             allow_redirects=True
         )
 

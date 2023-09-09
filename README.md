@@ -28,7 +28,7 @@ pip install -r requriements
 2. Connect Colab
 3. Install the requirements (Click 1st play button)
 4. Depend on the service modify the text field.
-5. Cick the play button, and start buying ticket.
+5. Cick the play button, and start buying tickets.
 
 <a href="https://colab.research.google.com/drive/1NUeypohFO___pW9Ou6lvOPUfn_tCoF9N?usp=sharing" target="_blank"><img src="https://colab.research.google.com/assets/colab-badge.svg" title="Open this file in Google Colab" alt="Colab"/></a>
 
@@ -73,6 +73,8 @@ pip install -r requriements
   -h, --help                    show this help message and exit
 
   -l, --list                    list the tickets
+
+  -a, --auto                    auto buy tickets (train has discount & fastest)
 
   -locale, --locale             interface language
 

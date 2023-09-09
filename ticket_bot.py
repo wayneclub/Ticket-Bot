@@ -25,6 +25,11 @@ def main() -> None:
     parser.add_argument('service',
                         type=str,
                         help="service name")
+    parser.add_argument('-a',
+                        '--auto',
+                        dest='auto',
+                        action='store_true',
+                        help="auto pick the ticket")
     parser.add_argument('-l',
                         '--list',
                         dest='list',

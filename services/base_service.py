@@ -27,6 +27,8 @@ class BaseService(object):
         self.fields = fields[self.service]
 
         self.locale = args.locale
+        self.auto = args.auto
+        self.list = args.list
 
         self.session = requests.Session()
         # self.session.mount('https://', TLSAdapter(max_retries=5))

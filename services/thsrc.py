@@ -7,9 +7,10 @@ This module is to buy tickets form THSRC
 
 from __future__ import annotations
 import base64
+import random
 import re
 import sys
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from bs4 import BeautifulSoup
 from services.base_service import BaseService
 from configs.config import user_agent
@@ -180,9 +181,10 @@ class THSRC(BaseService):
 
         return preferred_seat
 
-    def ocr_captcha(self, img_url):
-        """OCR captcha"""
-        res = self.session.get(img_url, timeout=200)
+    def get_security_code(self, captcha_url):
+        """OCR captcha, and return security code"""
+
+        res = self.session.get(captcha_url, timeout=200)
         if res.ok:
             base64_str = base64.b64encode(res.content).decode("utf-8")
             base64_str=base64_str.replace('+', '-').replace('/', '_').replace('=', '')
@@ -191,7 +193,9 @@ class THSRC(BaseService):
 
             res = self.session.post(self.config['api']['captcha_ocr'], json=data, timeout=200)
             if res.ok:
-                return res.json()['data']
+                security_code = res.json()['data']
+                self.logger.info("+ Security code: %s (%s)", security_code, captcha_url)
+                return security_code
             else:
                 self.logger.error(res.text)
                 sys.exit(1)
@@ -199,28 +203,37 @@ class THSRC(BaseService):
             self.logger.error(res.text)
             sys.exit(1)
 
-    def get_security_code(self):
-        """Get security code from captcha url"""
-        self.logger.info("Loading...")
+    def get_jsessionid(self):
+        """Get jsessionid and security code from captcha url"""
+        self.logger.info("\nLoading...")
 
         res = self.session.get(self.config['api']['reservation'], timeout=200, allow_redirects=True)
 
         if res.ok:
             page = BeautifulSoup(res.text, 'html.parser')
             captcha_url = 'https://irs.thsrc.com.tw' + page.find('img', class_='captcha-img')['src']
-            security_code = self.ocr_captcha(captcha_url)
-            self.logger.info("+ Security code: %s", security_code)
             jsessionid = res.cookies.get_dict()['JSESSIONID']
-            return security_code, jsessionid
+            return jsessionid, captcha_url
         else:
             self.logger.error(res.text)
             sys.exit(1)
 
-    def booking_form(self):
+    def update_captcha(self, jsessionid):
+        """Get security code from captcha url"""
+        self.logger.info("Update captcha")
+
+        res = self.session.get(self.config['api']['update_captcha'].format(jsessionid=jsessionid, random_value=random.random()), timeout=200)
+
+        if res.ok:
+            page = BeautifulSoup(res.text, 'lxml')
+            captcha_url = 'https://irs.thsrc.com.tw' + page.find('img', class_='captcha-img')['src']
+            return captcha_url
+        else:
+            self.logger.error(res.text)
+            sys.exit(1)
+
+    def booking_form(self, jsessionid, security_code):
         """1. Fill booking form"""
-        security_code, jsessionid = self.get_security_code()
-        if not security_code and not jsessionid:
-            security_code, jsessionid = self.get_security_code()
 
         if self.fields['train-no']:
             booking_method = 'radio33'
@@ -269,35 +282,56 @@ class THSRC(BaseService):
         )
 
         if res.ok:
-            return res.text
+            return res
         else:
             self.logger.error(res.text)
             sys.exit(1)
 
     def confirm_train(self, html_page, default_value:int = 1):
         """2. Confirm train"""
-
-        select_train_page = BeautifulSoup(html_page, 'html.parser')
         trains = []
-        for train in select_train_page.find_all('input', {'name':'TrainQueryDataViewPanel:TrainGroup'}):
-            duration = train.parent.findNext('div').find('div', class_='duration').text.replace('\n', '').replace('schedule', '').replace('directions_railway', '').split('｜')
-            schedule = duration[0]
-            train_no = duration[1]
-            discount = train.parent.findNext('div').find('div', class_='discount').text.replace('\n', '')
-            trains.append({
-                'departure_time' : train['querydeparture'],
-                'arrival_time' : train['queryarrival'],
-                'duration': schedule,
-                'discount': discount,
-                'no': train_no,
-                'value': train['value']
-            })
+        has_discount = False
+        for train in html_page.find_all('input', {'name':'TrainQueryDataViewPanel:TrainGroup'}):
+            if not self.fields['inbound-time'] or datetime.strptime(train['queryarrival'],'%H:%M').time() <= datetime.strptime(self.fields['inbound-time'],'%H:%M').time():
+                duration = train.parent.findNext('div').find('div', class_='duration').text.replace('\n', '').replace('schedule', '').replace('directions_railway', '').split('｜')
+                schedule = duration[0]
+                train_no = duration[1]
+                discount = train.parent.findNext('div').find('div', class_='discount').text.replace('\n', '')
+                if discount:
+                    has_discount = True
+
+                trains.append({
+                    'departure_time' : train['querydeparture'],
+                    'arrival_time' : train['queryarrival'],
+                    'duration': schedule,
+                    'discount': discount,
+                    'no': train_no,
+                    'value': train['value']
+                })
+
+        if not trains:
+            self.logger.info('\nThere is no trains left on %s, please reserve other day!', self.outbound_date)
+            sys.exit(0)
 
         self.logger.info('\nSelect train:')
+
         for idx, train in enumerate(trains, start=1):
             self.logger.info(f"{idx}. {train['departure_time']} -> {train['arrival_time']} ({train['duration']}) | {train['no']}\t{train['discount']}")
 
-        selected_opt = int(input(f'train (default: {default_value}): ') or default_value) -1
+        if self.list:
+            sys.exit(0)
+
+        if self.auto:
+            if has_discount:
+                trains = list(filter(lambda train: train['discount'], trains))
+            if self.fields['inbound-time']:
+                trains = list(filter(lambda train: datetime.strptime(self.fields['inbound-time'],'%H:%M') < datetime.strptime(train['arrival_time'],'%H:%M') + timedelta(minutes= 20), trains))
+
+            trains = [min(trains, key=lambda train: datetime.strptime(train['duration'],'%H:%M').time())]
+            self.logger.info(f"Auto pick train: {trains[0]['departure_time']} -> {trains[0]['arrival_time']} ({trains[0]['duration']}) | {trains[0]['no']}\t{trains[0]['discount']}")
+            selected_opt = 0
+        else:
+            selected_opt = int(input(f'train (default: {default_value}): ') or default_value) -1
 
         headers = {
             'Referer': 'https://irs.thsrc.com.tw/IMINT/?wicket:interface=:1::',
@@ -320,7 +354,7 @@ class THSRC(BaseService):
         )
 
         if res.ok:
-            return res.text
+            return res
         else:
             self.logger.error(res.text)
             sys.exit(1)
@@ -371,10 +405,7 @@ class THSRC(BaseService):
         )
 
         if res.ok:
-            if 'pnr-code' in res.text:
-                return res.text
-            else:
-                self.print_error_message(res.text)
+            return res
         else:
             self.logger.error(res.text)
             sys.exit(1)
@@ -382,14 +413,13 @@ class THSRC(BaseService):
     def show_result(self, html_page):
         """4. Show result"""
 
-        result_page = BeautifulSoup(html_page, 'html.parser')
-        reservation_no = result_page.find('p', class_='pnr-code').get_text(strip=True)
-        payment_deadline = result_page.find('p', class_='payment-status').get_text(strip=True)
+        reservation_no = html_page.find('p', class_='pnr-code').get_text(strip=True)
+        payment_deadline = html_page.find('p', class_='payment-status').get_text(strip=True)
         # ticket_num = result_page.find('p', class_='pnr-code').text
-        ticket_price = result_page.find('span', id='setTrainTotalPriceValue').get_text(strip=True)
+        ticket_price = html_page.find('span', id='setTrainTotalPriceValue').get_text(strip=True)
 
         self.logger.info("\nBooking success!")
-        self.logger.info("\n\n----------- Ticket -----------")
+        self.logger.info("\n\n---------------------- Ticket ----------------------")
         self.logger.info("Reservation No: %s", reservation_no)
         self.logger.info("Payment deadline: %s", payment_deadline)
         # self.logger.info("Count: %s", ticket_num)
@@ -397,28 +427,35 @@ class THSRC(BaseService):
 
 
     def main(self):
-        error = True
-        while error:
-            confirm_train_page = self.booking_form()
-            if 'feedbackPanelERROR' not in confirm_train_page:
-                error = False
-            else:
-                self.print_error_message(confirm_train_page)
 
-        error = True
-        while error:
-            confirm_ticket_page = self.confirm_train(confirm_train_page)
-            if 'feedbackPanelERROR' not in confirm_ticket_page:
-                error = False
-            else:
-                self.print_error_message(confirm_ticket_page)
+        jsessionid = ''
+        captcha_url = ''
+        while not jsessionid and not captcha_url:
+            jsessionid, captcha_url = self.get_jsessionid()
 
-        error = True
-        while error:
-            result_page = self.confirm_ticket(confirm_ticket_page)
-            if 'feedbackPanelERROR' not in result_page:
-                error = False
-            else:
-                self.print_error_message(result_page)
+        result_url = ''
+        while result_url != 'https://irs.thsrc.com.tw/IMINT/?wicket:interface=:1::':
+            security_code = self.get_security_code(captcha_url)
+            booking_form_result = self.booking_form(jsessionid, security_code)
+            result_url = booking_form_result.url
+            if '檢測碼輸入錯誤' in booking_form_result.text:
+                self.print_error_message(booking_form_result.text)
+                captcha_url = self.update_captcha(jsessionid=jsessionid)
+                print(captcha_url)
 
+        confirm_train_page = BeautifulSoup(booking_form_result.text, 'html.parser')
+
+        result_url = ''
+        while result_url != 'https://irs.thsrc.com.tw/IMINT/?wicket:interface=:2::':
+            confirm_train_result = self.confirm_train(confirm_train_page)
+            result_url = confirm_train_result.url
+
+        confirm_ticket_page = BeautifulSoup(confirm_train_result.text, 'html.parser')
+
+        result_url = ''
+        while result_url != 'https://irs.thsrc.com.tw/IMINT/?wicket:interface=:3::':
+            confirm_ticket_result = self.confirm_ticket(confirm_ticket_page)
+            result_url = confirm_ticket_result.url
+
+        result_page = BeautifulSoup(confirm_ticket_result.text, 'html.parser')
         self.show_result(result_page)

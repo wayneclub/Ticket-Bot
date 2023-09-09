@@ -42,6 +42,7 @@ available-timetable = [
 ]
 
 [api]
+update_captcha = 'https://irs.thsrc.com.tw/IMINT/;jsessionid={jsessionid}?wicket:interface=:0:BookingS1Form:homeCaptcha:reCodeLink::IBehaviorListener&wicket:behaviorId=0&random={random_value}'
 captcha_ocr = 'https://ocr.holey.cc/thsrc'
 reservation = 'https://irs.thsrc.com.tw/IMINT/'
 confirm_train = 'https://irs.thsrc.com.tw/IMINT/;jsessionid={jsessionid}?wicket:interface=:0:BookingS1Form::IFormSubmitListener'

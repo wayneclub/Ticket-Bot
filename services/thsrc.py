@@ -40,7 +40,7 @@ class THSRC(BaseService):
 
         page = BeautifulSoup(html_page, 'html.parser')
         for error_text in page.find_all('span', class_='feedbackPanelERROR'):
-            self.logger.error(error_text.text.strip())
+            self.logger.error('Error: %s', error_text.text.strip())
 
     def get_station(self, station_name):
         """Get station value"""
@@ -225,8 +225,7 @@ class THSRC(BaseService):
         res = self.session.get(self.config['api']['update_captcha'].format(jsessionid=jsessionid, random_value=random.random()), timeout=200)
 
         if res.ok:
-            page = BeautifulSoup(res.text, 'lxml')
-            captcha_url = 'https://irs.thsrc.com.tw' + page.find('img', class_='captcha-img')['src']
+            captcha_url = 'https://irs.thsrc.com.tw' + re.search('src="(.+?)"', res.text).group(1)
             return captcha_url
         else:
             self.logger.error(res.text)

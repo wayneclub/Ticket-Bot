@@ -207,7 +207,7 @@ class THSRC(BaseService):
         """Get jsessionid and security code from captcha url"""
         self.logger.info("\nLoading...")
 
-        res = self.session.get(self.config['api']['reservation'], timeout=200, allow_redirects=True)
+        res = self.session.get(self.config['page']['reservation'], timeout=200, allow_redirects=True)
 
         if res.ok:
             page = BeautifulSoup(res.text, 'html.parser')
@@ -328,13 +328,13 @@ class THSRC(BaseService):
                 trains = list(filter(lambda train: datetime.strptime(self.fields['inbound-time'],'%H:%M') < datetime.strptime(train['arrival_time'],'%H:%M') + timedelta(minutes= 20), trains))
 
             trains = [min(trains, key=lambda train: datetime.strptime(train['duration'],'%H:%M').time())]
-            self.logger.info(f"Auto pick train: {trains[0]['departure_time']} -> {trains[0]['arrival_time']} ({trains[0]['duration']}) | {trains[0]['no']}\t{trains[0]['discount']}")
+            self.logger.info(f"\nAuto pick train: {trains[0]['departure_time']} -> {trains[0]['arrival_time']} ({trains[0]['duration']}) | {trains[0]['no']}\t{trains[0]['discount']}")
             selected_opt = 0
         else:
             selected_opt = int(input(f'train (default: {default_value}): ') or default_value) -1
 
         headers = {
-            'Referer': 'https://irs.thsrc.com.tw/IMINT/?wicket:interface=:1::',
+            'Referer': self.config['page']['confirm_train'],
             'Upgrade-Insecure-Requests': '1',
             'User-Agent': user_agent,
         }
@@ -368,7 +368,7 @@ class THSRC(BaseService):
             roc_id = self.fields['id']
 
         headers = {
-            'Referer': 'https://irs.thsrc.com.tw/IMINT/?wicket:interface=:2::',
+            'Referer': self.config['page']['confirm_ticket'],
             'Upgrade-Insecure-Requests': '1',
             'User-Agent': user_agent,
         }
@@ -434,28 +434,36 @@ class THSRC(BaseService):
             jsessionid, captcha_url = self.get_jsessionid()
 
         result_url = ''
-        while result_url != 'https://irs.thsrc.com.tw/IMINT/?wicket:interface=:1::':
+        while result_url != self.config['page']['confirm_train']:
             security_code = self.get_security_code(captcha_url)
             booking_form_result = self.booking_form(jsessionid, security_code)
             result_url = booking_form_result.url
-            if '檢測碼輸入錯誤' in booking_form_result.text:
+
+            if result_url != self.config['page']['confirm_train']:
                 self.print_error_message(booking_form_result.text)
-                captcha_url = self.update_captcha(jsessionid=jsessionid)
-                print(captcha_url)
+
+                if '檢測碼輸入錯誤' in booking_form_result.text:
+                    captcha_url = self.update_captcha(jsessionid=jsessionid)
 
         confirm_train_page = BeautifulSoup(booking_form_result.text, 'html.parser')
 
         result_url = ''
-        while result_url != 'https://irs.thsrc.com.tw/IMINT/?wicket:interface=:2::':
+        while result_url != self.config['page']['confirm_ticket']:
             confirm_train_result = self.confirm_train(confirm_train_page)
             result_url = confirm_train_result.url
+
+            if result_url != self.config['page']['confirm_ticket']:
+                self.print_error_message(booking_form_result.text)
 
         confirm_ticket_page = BeautifulSoup(confirm_train_result.text, 'html.parser')
 
         result_url = ''
-        while result_url != 'https://irs.thsrc.com.tw/IMINT/?wicket:interface=:3::':
+        while result_url != self.config['page']['result']:
             confirm_ticket_result = self.confirm_ticket(confirm_ticket_page)
             result_url = confirm_ticket_result.url
+
+            if result_url != self.config['page']['result']:
+                self.print_error_message(booking_form_result.text)
 
         result_page = BeautifulSoup(confirm_ticket_result.text, 'html.parser')
         self.show_result(result_page)

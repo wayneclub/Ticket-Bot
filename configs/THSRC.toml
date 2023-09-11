@@ -46,13 +46,12 @@ update_captcha = 'https://irs.thsrc.com.tw/IMINT/;jsessionid={jsessionid}?wicket
 captcha_ocr = 'https://ocr.holey.cc/thsrc'
 confirm_train = 'https://irs.thsrc.com.tw/IMINT/;jsessionid={jsessionid}?wicket:interface=:0:BookingS1Form::IFormSubmitListener'
 confirm_ticket = 'https://irs.thsrc.com.tw/IMINT/?wicket:interface=:1:BookingS2Form::IFormSubmitListener'
-submit = 'https://irs.thsrc.com.tw/IMINT/?wicket:interface=:2:BookingS3Form::IFormSubmitListener'
+submit = 'https://irs.thsrc.com.tw/IMINT/?wicket:interface=:{interface}:BookingS3Form::IFormSubmitListener'
 
 [page]
 reservation = 'https://irs.thsrc.com.tw/IMINT/'
-confirm_train = 'https://irs.thsrc.com.tw/IMINT/?wicket:interface=:1::'
-confirm_ticket = 'https://irs.thsrc.com.tw/IMINT/?wicket:interface=:2::'
-result = 'https://irs.thsrc.com.tw/IMINT/?wicket:interface=:3::'
+interface = 'https://irs.thsrc.com.tw/IMINT/?wicket:interface=:{interface}::'
+history = 'https://irs.thsrc.com.tw/IMINT/?wicket:bookmarkablePage=:tw.com.mitac.webapp.thsr.viewer.History'
 
 [station]
 Nangang = 1

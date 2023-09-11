@@ -19,6 +19,7 @@ class Config:
     """
 
     def __init__(self, **kwargs: Any):
+        self.schedules: dict = kwargs.get("schedules") or {}
         self.fields: dict = kwargs.get("fields") or {}
         self.directories: dict = kwargs.get("directories") or {}
         self.headers: dict = kwargs.get("headers") or {}
@@ -64,5 +65,6 @@ filenames = Filenames()
 
 config = Config.from_toml(filenames.root_config)
 config.directories['logs'] = directories.logs
+schedules = config.schedules
 fields = config.fields
 user_agent = config.headers['User-Agent']

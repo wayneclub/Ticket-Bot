@@ -19,7 +19,6 @@ from configs.config import user_agent
 class THSRC(BaseService):
     """
     Service code for THSRC (https://irs.thsrc.com.tw/IMINT/).
-
     """
 
     def __init__(self, args):
@@ -102,7 +101,7 @@ class THSRC(BaseService):
             for idx, t_str in enumerate(self.config['available-timetable'], start=1):
                 t_int = int(t_str[:-1])
                 if t_str[-1] == "A" and (t_int // 100) == 12:
-                    t_int = "{:04d}".format(t_int % 1200)  # type: ignore
+                    t_int = f"{(t_int % 1200):04d}"  # type: ignore
                 elif t_int != 1230 and t_str[-1] == "P":
                     t_int += 1200
 
@@ -236,8 +235,10 @@ class THSRC(BaseService):
 
         if self.fields['train-no']:
             booking_method = 'radio33'
+            self.outbound_time = ''
         else:
             booking_method = 'radio31'
+            self.fields['train-no'] = ''
 
         headers = {
             'Referer': 'https://irs.thsrc.com.tw/IMINT/',
@@ -256,7 +257,7 @@ class THSRC(BaseService):
             'toTimeInputField': self.outbound_date,
             'backTimeInputField': self.outbound_date,
             'toTimeTable': self.outbound_time,
-            'toTrainIDInputField': '',
+            'toTrainIDInputField': self.fields['train-no'].strip(),
             'backTimeTable': '',
             'backTrainIDInputField': '',
             'ticketPanel:rows:0:ticketAmount': self.ticket_num[0],
@@ -318,13 +319,13 @@ class THSRC(BaseService):
             self.logger.info(f"{idx}. {train['departure_time']} -> {train['arrival_time']} ({train['duration']}) | {train['no']}\t{train['discount']}")
 
         if self.list:
-            sys.exit(0)
+            return
 
         if self.auto:
             if has_discount:
-                trains = list(filter(lambda train: train['discount'], trains))
+                trains = list(filter(lambda train: train['discount'], trains)) or trains
             if self.fields['inbound-time']:
-                trains = list(filter(lambda train: datetime.strptime(self.fields['inbound-time'],'%H:%M') < datetime.strptime(train['arrival_time'],'%H:%M') + timedelta(minutes= 20), trains))
+                trains = list(filter(lambda train: datetime.strptime(self.fields['inbound-time'],'%H:%M') < datetime.strptime(train['arrival_time'],'%H:%M') + timedelta(minutes= 20), trains)) or trains
 
             trains = [min(trains, key=lambda train: datetime.strptime(train['duration'],'%H:%M').time())]
             self.logger.info(f"\nAuto pick train: {trains[0]['departure_time']} -> {trains[0]['arrival_time']} ({trains[0]['duration']}) | {trains[0]['no']}\t{trains[0]['discount']}")
@@ -333,7 +334,7 @@ class THSRC(BaseService):
             selected_opt = int(input(f'train (default: {default_value}): ') or default_value) -1
 
         headers = {
-            'Referer': self.config['page']['confirm_train'],
+            'Referer': self.config['page']['interface'].format(interface=1),
             'Upgrade-Insecure-Requests': '1',
             'User-Agent': user_agent,
         }
@@ -366,8 +367,13 @@ class THSRC(BaseService):
         else:
             roc_id = self.fields['id']
 
+        if self.fields['train-no']:
+            interface = 1
+        else:
+            interface = 2
+
         headers = {
-            'Referer': self.config['page']['confirm_ticket'],
+            'Referer': self.config['page']['interface'].format(interface=interface),
             'Upgrade-Insecure-Requests': '1',
             'User-Agent': user_agent,
         }
@@ -396,7 +402,7 @@ class THSRC(BaseService):
         }
 
         res = self.session.post(
-            self.config['api']['submit'],
+            self.config['api']['submit'].format(interface=interface),
             headers=headers,
             data=data,
             timeout=200,
@@ -410,22 +416,41 @@ class THSRC(BaseService):
             sys.exit(1)
 
     def show_result(self, html_page):
-        """4. Show result"""
+        """4. Print result"""
 
         reservation_no = html_page.find('p', class_='pnr-code').get_text(strip=True)
-        payment_deadline = html_page.find('p', class_='payment-status').get_text(strip=True)
-        # ticket_num = result_page.find('p', class_='pnr-code').text
+        payment_status = html_page.find('p', class_='payment-status').get_text(strip=True)
+        car_type = html_page.find('div', class_='car-type').find('p', class_='info-data').get_text(strip=True)
+        ticket_type = html_page.find('div', class_='ticket-type').find('div').get_text(strip=True)
         ticket_price = html_page.find('span', id='setTrainTotalPriceValue').get_text(strip=True)
+        card = html_page.find('div', class_='ticket-card')
+        onbound_date = card.find('span', class_='date').get_text(strip=True)
+        train_no = card.find('span', id='setTrainCode0').get_text(strip=True)
+        departure_time = card.find('p', class_='departure-time').get_text(strip=True)
+        departure_station = card.find('p', class_='departure-stn').get_text(strip=True)
+        arrival_time = card.find('p', class_='arrival-time').get_text(strip=True)
+        arrival_station = card.find('p', class_='arrival-stn').get_text(strip=True)
+        duration = card.find('span', id='InfoEstimatedTime0').get_text(strip=True)
+        seats = [seat.get_text(strip=True) for seat in html_page.find('div', class_='detail').find_all('div', class_='seat-label')]
 
         self.logger.info("\nBooking success!")
-        self.logger.info("\n\n---------------------- Ticket ----------------------")
+        self.logger.info("\n---------------------- Ticket ----------------------")
         self.logger.info("Reservation No: %s", reservation_no)
-        self.logger.info("Payment deadline: %s", payment_deadline)
-        # self.logger.info("Count: %s", ticket_num)
+        self.logger.info("Payment status: %s", payment_status)
+        self.logger.info("Car Type: %s", car_type)
+        self.logger.info("Ticket Type: %s", ticket_type)
         self.logger.info("Price: %s", ticket_price)
-
+        self.logger.info("----------------------------------------------------")
+        self.logger.info("Onbound date: %s", onbound_date)
+        self.logger.info("Train No: %s", train_no)
+        self.logger.info("Duration: %s", duration)
+        self.logger.info("%s (%s) -> %s (%s)", departure_time, departure_station, arrival_time, arrival_station)
+        self.logger.info("----------------------------------------------------")
+        self.logger.info("Seats: %s", ', '.join(seats))
+        self.logger.info("\n\nGo to the reservation record (%s) to confirm the ticket and pay!", self.config['page']['history'])
 
     def main(self):
+        """Buy ticket process"""
 
         jsessionid = ''
         captcha_url = ''
@@ -433,12 +458,12 @@ class THSRC(BaseService):
             jsessionid, captcha_url = self.get_jsessionid()
 
         result_url = ''
-        while result_url != self.config['page']['confirm_train']:
+        while result_url != self.config['page']['interface'].format(interface=1):
             security_code = self.get_security_code(captcha_url)
             booking_form_result = self.booking_form(jsessionid, security_code)
             result_url = booking_form_result.url
 
-            if result_url != self.config['page']['confirm_train']:
+            if result_url != self.config['page']['interface'].format(interface=1):
                 self.print_error_message(booking_form_result.text)
 
                 if '檢測碼輸入錯誤' in booking_form_result.text:
@@ -446,22 +471,29 @@ class THSRC(BaseService):
 
         confirm_train_page = BeautifulSoup(booking_form_result.text, 'html.parser')
 
+        if not self.fields['train-no']:
+            result_url = ''
+            while result_url != self.config['page']['interface'].format(interface=2):
+                confirm_train_result = self.confirm_train(confirm_train_page)
+                if self.list:
+                    return
+                result_url = confirm_train_result.url
+
+                if result_url != self.config['page']['interface'].format(interface=2):
+                    self.print_error_message(booking_form_result.text)
+
+            confirm_ticket_page = BeautifulSoup(confirm_train_result.text, 'html.parser')
+            interface = 3
+        else:
+            confirm_ticket_page = confirm_train_page
+            interface = 2
+
         result_url = ''
-        while result_url != self.config['page']['confirm_ticket']:
-            confirm_train_result = self.confirm_train(confirm_train_page)
-            result_url = confirm_train_result.url
-
-            if result_url != self.config['page']['confirm_ticket']:
-                self.print_error_message(booking_form_result.text)
-
-        confirm_ticket_page = BeautifulSoup(confirm_train_result.text, 'html.parser')
-
-        result_url = ''
-        while result_url != self.config['page']['result']:
+        while result_url != self.config['page']['interface'].format(interface=interface):
             confirm_ticket_result = self.confirm_ticket(confirm_ticket_page)
             result_url = confirm_ticket_result.url
 
-            if result_url != self.config['page']['result']:
+            if result_url != self.config['page']['interface'].format(interface=interface):
                 self.print_error_message(booking_form_result.text)
 
         result_page = BeautifulSoup(confirm_ticket_result.text, 'html.parser')

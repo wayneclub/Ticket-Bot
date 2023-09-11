@@ -8,10 +8,13 @@ import os
 import sys
 import argparse
 import logging
-from logging import INFO, DEBUG
+import re
 from datetime import datetime
+import time
+from zoneinfo import ZoneInfo
+from logging import INFO, DEBUG
 from services import service_map
-from configs.config import config, app_name, filenames, __version__
+from configs.config import config, app_name, filenames, schedules, __version__
 from utils.io import load_toml
 
 def main() -> None:
@@ -107,13 +110,29 @@ def main() -> None:
         args.log = log
         args.config = service_config
         args.service = service['name']
+
+        if schedules[service['name']].get('datetime'):
+            schedule_time = schedules[service['name']]['datetime']
+            timezone = ZoneInfo('Asia/Taipei')
+            current_time = datetime.now(timezone)
+            if re.search(r'^\d+:\d+$', schedule_time):
+                schedule_time = f"{current_time.date()} {schedule_time}"
+
+            schedule_time = datetime.strptime(schedule_time, '%Y-%m-%d %H:%M').astimezone(timezone)
+            logging.info("The bot will auto buy tickets on %s", schedule_time)
+            while current_time.time() <= schedule_time.time():
+                current_time = datetime.now(ZoneInfo('Asia/Taipei'))
+                print(f"Current time: {current_time.strftime('%Y-%m-%d %H:%M:%S')}", end='\r', flush=True)
+                time.sleep(1)
+
+        start = datetime.now()
         service['class'](args).main()
+        logging.info("\n%s took %.3f seconds", app_name, float((datetime.now() - start).total_seconds()))
+
     else:
         logging.warning("\nOnly support buying ticket from %s ", support_services)
         sys.exit(1)
 
-    logging.info("\n%s took %s seconds", app_name,
-                 int(float((datetime.now() - start).total_seconds())))
 
 
 if __name__ == "__main__":

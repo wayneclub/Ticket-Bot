@@ -1,5 +1,11 @@
 # This is an example Ticket Bot's config file.
 
+# Auto buy tickets on schedule time
+[schedules]
+
+[schedules.THSRC]
+datetime = '' # datetime (e.g. 2023-01-01 00:00)
+
 # Copy user-agent from login browser (https://www.whatsmyua.info/)
 [headers]
 User-Agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36'
@@ -9,18 +15,18 @@ User-Agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36
 [fields]
 
 [fields.THSRC]
-id = ''
-start-station = ''
-dest-station = ''
-outbound-date = ''
-outbound-time = ''
-inbound-time = ''
-preferred-seat = ''
-train-class = ''
-train-no = ''
-email = ''
-phone = ''
-tgo-id = ''
+id = ''             # ROC ID No. (e.g. AXXXXXXXXX)
+start-station = ''  # Start-station (e.g. Taipei)
+dest-station = ''   # Dest-station (e.g. Tainan)
+outbound-date = ''  # Outbound date (e.g. 2023-01-01)
+outbound-time = ''  # Outbound time (e.g. 09:00)
+inbound-time = ''   # Inbound time (e.g. 12:00)
+preferred-seat = '' # Preferred seat e.g. window/aisle
+train-class = ''    # Train class (e.g. normal/business)
+train-no = ''       # Train No. (e.g. 001)
+email = ''          # E-mail for notification
+phone = ''          # Phone number for SMS notification
+tgo-id = ''         # TSHRC member ID (e.g. AXXXXXXXXX)
 
 [fields.THSRC.ticket]
 adult = 1
@@ -42,6 +48,6 @@ college = 0
 # for a nordvpn server automatically.
 # The credentials should be `Service credentials` NOT your Nord account details!
 # https://my.nordaccount.com/dashboard/nordvpn/ (Under advanced configuration).
-# ex: https://support.nordvpn.com/Connectivity/Proxy/1087802472/Proxy-setup-on-qBittorrent.htm
+# e.g.: https://support.nordvpn.com/Connectivity/Proxy/1087802472/Proxy-setup-on-qBittorrent.htm
 username = ''
 password = ''

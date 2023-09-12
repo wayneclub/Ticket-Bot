@@ -29,7 +29,7 @@ class THSRC(BaseService):
         self.outbound_date = self.select_date()
         self.outbound_time = self.select_time()
         self.ticket_num = self.select_ticket_num()
-        self.train_class = self.select_train_class()
+        self.car_type = self.select_car_type()
         self.preferred_seat = self.select_preferred_seat()
 
         self.total = 1
@@ -160,15 +160,15 @@ class THSRC(BaseService):
 
         return tickets
 
-    def select_train_class(self, default_value: int = 0) -> str:
+    def select_car_type(self, default_value: int = 0) -> str:
         """Select class"""
 
-        train_class = self.config['train-class'].get(self.fields['train-class'])
+        car_type = self.config['car-type'].get(self.fields['car-type'])
 
-        if not train_class:
-            train_class = default_value
+        if not car_type:
+            car_type = default_value
 
-        return train_class
+        return car_type
 
     def select_preferred_seat(self, default_value: int = 0) -> str:
         """Select preferred seat"""
@@ -249,7 +249,7 @@ class THSRC(BaseService):
         data = {
             'BookingS1Form:hf:0': '',
             'tripCon:typesoftrip': '0',
-            'trainCon:trainRadioGroup': self.train_class,
+            'trainCon:trainRadioGroup': self.car_type,
             'seatCon:seatRadioGroup': self.preferred_seat,
             'bookingMethod': booking_method,
             'selectStartStation': self.start_station,
@@ -436,12 +436,12 @@ class THSRC(BaseService):
         self.logger.info("\nBooking success!")
         self.logger.info("\n---------------------- Ticket ----------------------")
         self.logger.info("Reservation No: %s", reservation_no)
-        self.logger.info("Payment status: %s", payment_status)
+        self.logger.info("Payment Status: %s", payment_status)
         self.logger.info("Car Type: %s", car_type)
         self.logger.info("Ticket Type: %s", ticket_type)
         self.logger.info("Price: %s", ticket_price)
         self.logger.info("----------------------------------------------------")
-        self.logger.info("Onbound date: %s", onbound_date)
+        self.logger.info("Date: %s", onbound_date)
         self.logger.info("Train No: %s", train_no)
         self.logger.info("Duration: %s", duration)
         self.logger.info("%s (%s) -> %s (%s)", departure_time, departure_station, arrival_time, arrival_station)

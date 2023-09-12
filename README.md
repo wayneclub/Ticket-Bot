@@ -47,7 +47,7 @@ pip install -r requriements
     outbound-time = ''
     inbound-time = ''
     preferred-seat = ''
-    train-class = ''
+    car-type = ''
     train-no = ''
     email = ''
     phone = ''

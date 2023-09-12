@@ -74,7 +74,7 @@ disabled = 'W'
 elder = 'E'
 college = 'P'
 
-[train-class]
+[car-type]
 normal = 0
 business = 1
 

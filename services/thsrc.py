@@ -121,6 +121,11 @@ class THSRC(BaseService):
             return self.config['available-timetable'][index-1]
         else:
             t_int = int(self.fields['outbound-time'].replace(':', ''))
+            if t_int % 100 >= 30:
+                t_int = int(t_int/100)*100 + 30
+            else:
+                t_int = int(t_int/100)*100
+
             if t_int == 0:
                 t_str = '1201A'
             elif t_int == 30:

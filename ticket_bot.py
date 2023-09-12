@@ -122,7 +122,7 @@ def main() -> None:
             logging.info("The bot will auto buy tickets on %s", schedule_time)
             while current_time.time() <= schedule_time.time():
                 current_time = datetime.now(ZoneInfo('Asia/Taipei'))
-                print(f"\rCurrent time: {current_time.strftime('%Y-%m-%d %H:%M:%S')}", end='', flush=True)
+                print(f"\rCurrent time: {current_time.strftime('%Y-%m-%d %H:%M:%S')}", end='')
                 time.sleep(1)
 
         start = datetime.now()

@@ -420,7 +420,7 @@ class THSRC(BaseService):
             self.logger.error(res.text)
             sys.exit(1)
 
-    def show_result(self, html_page):
+    def print_result(self, html_page):
         """4. Print result"""
 
         reservation_no = html_page.find('p', class_='pnr-code').get_text(strip=True)
@@ -452,7 +452,7 @@ class THSRC(BaseService):
         self.logger.info("%s (%s) -> %s (%s)", departure_time, departure_station, arrival_time, arrival_station)
         self.logger.info("----------------------------------------------------")
         self.logger.info("Seats: %s", ', '.join(seats))
-        self.logger.info("\n\nGo to the reservation record (%s) to confirm the ticket and pay!", self.config['page']['history'])
+        self.logger.info("\n\nGo to the reservation record to confirm the ticket and pay!\n (%s) ", self.config['page']['history'])
 
     def main(self):
         """Buy ticket process"""
@@ -502,4 +502,4 @@ class THSRC(BaseService):
                 self.print_error_message(booking_form_result.text)
 
         result_page = BeautifulSoup(confirm_ticket_result.text, 'html.parser')
-        self.show_result(result_page)
+        self.print_result(result_page)

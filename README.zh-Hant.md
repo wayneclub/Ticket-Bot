@@ -32,7 +32,7 @@ pip install -r requriements
 
 <a href="https://colab.research.google.com/drive/1NUeypohFO___pW9Ou6lvOPUfn_tCoF9N?usp=sharing" target="_blank"><img src="https://colab.research.google.com/assets/colab-badge.svg" title="Open this file in Google Colab" alt="Colab"/></a>
 
-### Local
+### 本機執行
 
 1. 根據不同購票平台服務填寫購票參數 `Ticket-Bot/user_config.toml`
 
@@ -70,19 +70,19 @@ pip install -r requriements
 ## 參數
 
 ```text
-  -h, --help                    show this help message and exit
+  -h, --help                    顯示參數命令
 
-  -l, --list                    list the tickets
+  -l, --list                    列出所有可購買票券
 
-  -a, --auto                    auto buy tickets (train has discount & fastest)
+  -a, --auto                    自動選擇最佳票券（車票：最便宜、最快的班次）
 
-  -locale, --locale             interface language
+  -locale, --locale             語言介面
 
-  -p, --proxy                   proxy
+  -p, --proxy                   代理
 
-  -d, --debug                   enable debug logging
+  -d, --debug                   啟用偵錯模式
 
-  -v, --version                 app's version
+  -v, --version                 版本
 ```
 
 ## 更多範例
@@ -97,4 +97,4 @@ python ticket_bot.py thsrc
 
 - 購票過程中出現任何問題，請上傳截圖和日誌檔案（請提供服務名稱和命令）。
 
-## Appendix
+## 附錄

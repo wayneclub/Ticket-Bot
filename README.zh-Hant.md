@@ -1,16 +1,16 @@
-# Ticket-Bot
+# 訂票機器人
 
-[![zh](https://img.shields.io/badge/lang-中文-blue)](https://github.com/wayneclub/Ticket-Bot/blob/main/README.zh-Hant.md) [![python](https://img.shields.io/badge/python-3.8-blue)](https://www.python.org/downloads/)
+[![zh](https://img.shields.io/badge/lang-中文-blue)](https://github.com/wayneclub/Ticket-Bot/blob/main/README.md) [![python](https://img.shields.io/badge/python-3.8-blue)](https://www.python.org/downloads/)
 
-**NON-COMMERCIAL USE ONLY**
+**禁止營利使用，只限個人研究使用**
 
-Ticket Bot supports auto buying ticket from [THSRC](https://irs.thsrc.com.tw/IMINT/).
+訂票機器人目前支援自動購買 [台灣高鐵](https://irs.thsrc.com.tw/IMINT/)車票。
 
-## DESCRIPTION
+## 說明
 
-Ticket-Bot is a command-line program which could auto buy tickets from websites. It requires [Python 3.8+](https://www.python.org/downloads/), and [NodeJS](https://nodejs.org/en/download). It should work on Linux, on Windows or on macOS. This project is only for personal research and language learning.
+訂票機器人是一個方便幫您從各個平台自動購買票券的小幫手。需要安裝 [Python 3.8+](https://www.python.org/downloads/) 和 [NodeJS](https://nodejs.org/en/download)。可以在 Linux、Windows 或 macOS 上執行。
 
-## INSTALLATION
+## 安裝方式
 
 - Linux, macOS:
 
@@ -18,23 +18,23 @@ Ticket-Bot is a command-line program which could auto buy tickets from websites.
 pip install -r requriements
 ```
 
-- Windows: Execute `install_requirements.bat`
+- Windows: 執行 `install_requirements.bat`
 
-## USAGE
+## 使用方式
 
-### Online **_(Colab environment is in the US, if you want to use in other region please execute on local)_**
+### 線上執行 **_(Colab環境在美國，如果訪問受限制，請在本機執行)_**
 
-1. Save a copy in Drive
-2. Connect Colab
-3. Install the requirements (Click 1st play button)
-4. Depend on the service modify the text field.
-5. Cick the play button, and start buying tickets.
+1. 複製一份到自己的雲端
+2. 連結 Colab
+3. 環境設定，安裝必要程式（執行第ㄧ個按鈕）
+4. 依照不同購票平台填入各項購票資料
+5. 填完後按下執行，會自動買票，複製成功購票連結到瀏覽器即可繳費
 
 <a href="https://colab.research.google.com/drive/1NUeypohFO___pW9Ou6lvOPUfn_tCoF9N?usp=sharing" target="_blank"><img src="https://colab.research.google.com/assets/colab-badge.svg" title="Open this file in Google Colab" alt="Colab"/></a>
 
 ### Local
 
-1. Depend on the service and modify `Ticket-Bot/user_config.toml`
+1. 根據不同購票平台服務填寫購票參數 `Ticket-Bot/user_config.toml`
 
     ```toml
     [fields]
@@ -61,13 +61,13 @@ pip install -r requriements
     college = 0  # 大學生票
     ```
 
-2. Execute the program with command line or `Ticket-Bot.bat`
+2. 使用python指令執行程式或執行`Ticket-Bot.bat`
 
     ```bash
     python ticket_bot.py service [OPTIONS]
     ```
 
-## OPTIONS
+## 參數
 
 ```text
   -h, --help                    show this help message and exit
@@ -85,9 +85,9 @@ pip install -r requriements
   -v, --version                 app's version
 ```
 
-## More Examples
+## 更多範例
 
-- Buy ticket from THSRC
+- 從台灣高鐵訂票
 
 ```bash
 python ticket_bot.py thsrc
@@ -95,6 +95,6 @@ python ticket_bot.py thsrc
 
 ## FAQ
 
-- Any issue during buying tickets, upload the screenshots and log files (Please provide service name and the command).
+- 購票過程中出現任何問題，請上傳截圖和日誌檔案（請提供服務名稱和命令）。
 
 ## Appendix

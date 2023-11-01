@@ -39,7 +39,10 @@ class THSRC(BaseService):
 
         page = BeautifulSoup(html_page, 'html.parser')
         for error_text in page.find_all('span', class_='feedbackPanelERROR'):
-            self.logger.error('Error: %s', error_text.text.strip())
+            error_message = error_text.text.strip()
+            self.logger.error('Error: %s', error_message)
+            if '售完' in error_message or '選擇的日期超過目前開放預訂之日期' in error_message or '請選擇購票種類及張數' in error_message:
+                sys.exit(0)
 
     def get_station(self, station_name):
         """Get station value"""
@@ -146,10 +149,11 @@ class THSRC(BaseService):
 
         total = 0
         tickets = list()
+
         for ticket in self.fields['ticket']:
             ticket_num = int(self.fields['ticket'][ticket])
             total += ticket_num
-            if ticket_num > 0:
+            if ticket_num >= 0:
                 tickets.append(f"{ticket_num}{self.config['ticket-type'][ticket]}")
             else:
                 tickets.append('')
@@ -159,7 +163,7 @@ class THSRC(BaseService):
             sys.exit()
         elif total == 0:
             tickets = [f"{default_value}{self.config['ticket-type']['adult']}", '', '', '']
-            total = 1
+            total = default_value
 
         self.total = total
 
@@ -269,6 +273,7 @@ class THSRC(BaseService):
             'ticketPanel:rows:1:ticketAmount': self.ticket_num[1],
             'ticketPanel:rows:2:ticketAmount': self.ticket_num[2],
             'ticketPanel:rows:3:ticketAmount': self.ticket_num[3],
+            'ticketPanel:rows:4:ticketAmount': self.ticket_num[4],
             'homeCaptcha:securityCode': security_code,
             'SubmitButton': 'Search',
             'portalTag': 'false',

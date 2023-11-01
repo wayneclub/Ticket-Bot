@@ -4,7 +4,7 @@
 
 **NON-COMMERCIAL USE ONLY**
 
-Ticket Bot supports auto buying ticket from THSRC.
+Ticket Bot supports auto buying ticket from [THSRC](https://irs.thsrc.com.tw/IMINT/?utm_source=thsrc&utm_medium=textlink&utm_term=booking).
 
 ## DESCRIPTION
 

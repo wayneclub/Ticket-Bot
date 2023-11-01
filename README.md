@@ -40,25 +40,25 @@ pip install -r requriements
     [fields]
 
     [fields.THSRC]
-    id = ''
-    start-station = ''
-    dest-station = ''
-    outbound-date = ''
-    outbound-time = ''
-    inbound-time = ''
-    preferred-seat = ''
-    car-type = ''
-    train-no = ''
-    email = ''
-    phone = ''
-    tgo-id = ''
+    id = ''             # ROC ID No. 身分證字號 (e.g. AXXXXXXXXX)
+    start-station = ''  # Start-station 出發站 (e.g. Taipei)
+    dest-station = ''   # Dest-station 抵達站 (e.g. Tainan)
+    outbound-date = ''  # Outbound date 出發日期 (e.g. 2023-01-01)
+    outbound-time = ''  # Outbound time 出發時間 (e.g. 09:00)
+    inbound-time = ''   # Inbound time 抵達時間 (e.g. 12:00)
+    preferred-seat = '' # Preferred seat 座位偏好 (e.g. window/aisle)
+    car-type = ''       # Car Type 車廂類型 (e.g. normal/business)
+    train-no = ''       # Train No. 車次 (e.g. 001)
+    email = ''          # E-mail for notification
+    phone = ''          # Phone number for SMS notification 手機號碼
+    tgo-id = ''         # TSHRC member ID TGO會員ID (e.g. AXXXXXXXXX)
 
     [fields.THSRC.ticket]
-    adult = 1
-    elder = 0
-    child = 0
-    disabled = 0
-    college = 0
+    adult = 1    # 全票
+    child = 0    # 孩童票 (6-11)
+    disabled = 0 # 愛心票
+    elder = 0    # 敬老票
+    college = 0  # 大學生票
     ```
 
 2. Execute the program with command line or `Ticket-Bot.bat`

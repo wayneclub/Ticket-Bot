@@ -1,6 +1,3 @@
-#!/usr/bin/python3
-# coding: utf-8
-
 """
 This module is to download subtitle from stream services.
 """
@@ -17,10 +14,12 @@ from services import service_map
 from configs.config import config, app_name, filenames, schedules, __version__
 from utils.io import load_toml
 
+
 def main() -> None:
     """args command"""
 
-    support_services = ', '.join(sorted((service['name'] for service in service_map), key=str.lower))
+    support_services = ', '.join(
+        sorted((service['name'] for service in service_map), key=str.lower))
 
     parser = argparse.ArgumentParser(
         description="Support auto buy tickets from THSR ticket",
@@ -118,21 +117,24 @@ def main() -> None:
             if re.search(r'^\d+:\d+$', schedule_time):
                 schedule_time = f"{current_time.date()} {schedule_time}"
 
-            schedule_time = datetime.strptime(schedule_time, '%Y-%m-%d %H:%M').astimezone(timezone)
+            schedule_time = datetime.strptime(
+                schedule_time, '%Y-%m-%d %H:%M').astimezone(timezone)
             logging.info("The bot will auto buy tickets on %s", schedule_time)
             while current_time.time() <= schedule_time.time():
                 current_time = datetime.now(ZoneInfo('Asia/Taipei'))
-                print(f"\rCurrent time: {current_time.strftime('%Y-%m-%d %H:%M:%S')}", end='')
+                print(
+                    f"\rCurrent time: {current_time.strftime('%Y-%m-%d %H:%M:%S')}", end='')
                 time.sleep(1)
 
         start = datetime.now()
         service['class'](args).main()
-        logging.info("\n%s took %.3f seconds", app_name, float((datetime.now() - start).total_seconds()))
+        logging.info("\n%s took %.3f seconds", app_name, float(
+            (datetime.now() - start).total_seconds()))
 
     else:
-        logging.warning("\nOnly support buying ticket from %s ", support_services)
+        logging.warning(
+            "\nOnly support buying ticket from %s ", support_services)
         sys.exit(1)
-
 
 
 if __name__ == "__main__":

@@ -13,7 +13,7 @@ from bs4 import BeautifulSoup
 import pyperclip
 from services.base_service import BaseService
 from configs.config import user_agent
-from utils.validate import check_roc_id
+from utils.validate import check_roc_id, check_tax_id
 
 
 class THSRC(BaseService):
@@ -428,10 +428,17 @@ class THSRC(BaseService):
                 'name': 'TicketMemberSystemInputPanel:TakerMemberSystemDataView:memberSystemRadioGroup'
             },
         )
+
+        tax_id = self.fields['tax-id']
+        tgo_id = self.fields['tgo-id']
         if self.fields['tgo-id']:
             ticket_member = candidates[1].attrs['value']
-        elif self.fields['tax-id']:
+            if not check_roc_id(tgo_id):
+                tgo_id = input("\nInput tgo id: ")
+        elif tax_id:
             ticket_member = candidates[2].attrs['value']
+            if not check_tax_id(tax_id):
+                tax_id = input("\nInput tax id: ")
         else:
             ticket_member = candidates[0].attrs['value']
 
@@ -452,8 +459,8 @@ class THSRC(BaseService):
             'dummyPhone': self.fields['phone'],
             'email': self.fields['email'],
             'TicketMemberSystemInputPanel:TakerMemberSystemDataView:memberSystemRadioGroup': ticket_member,
-            'TicketMemberSystemInputPanel:TakerMemberSystemDataView:memberSystemRadioGroup:memberShipNumber': self.fields['tgo-id'],
-            'TicketMemberSystemInputPanel:TakerMemberSystemDataView:memberSystemRadioGroup:GUINumber:': self.fields['tax-id'],
+            'TicketMemberSystemInputPanel:TakerMemberSystemDataView:memberSystemRadioGroup:memberShipNumber': tgo_id,
+            'TicketMemberSystemInputPanel:TakerMemberSystemDataView:memberSystemRadioGroup:GUINumber:': tax_id,
             'agree': 'on',
         }
 

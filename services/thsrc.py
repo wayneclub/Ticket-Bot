@@ -7,6 +7,7 @@ This module is to buy tickets form THSRC
 
 from __future__ import annotations
 import base64
+import os
 import random
 import re
 import sys
@@ -495,7 +496,6 @@ class THSRC(BaseService):
 
         reservation_no = html_page.find(
             'p', class_='pnr-code').get_text(strip=True)
-        pyperclip.copy(reservation_no)
         payment_status = html_page.find(
             'p', class_='payment-status').get_text(strip=True)
         car_type = html_page.find(
@@ -540,6 +540,10 @@ class THSRC(BaseService):
         self.logger.info("Seats: %s", ', '.join(seats))
         self.logger.info(
             "\n\nGo to the reservation record to confirm the ticket and pay!\n (%s) ", self.config['page']['history'])
+
+        if not os.getenv("COLAB_RELEASE_TAG"):
+            pyperclip.copy(reservation_no)
+            self.logger.info("\nReservation No. has been copied to clipboard!")
 
     def main(self):
         """Buy ticket process"""

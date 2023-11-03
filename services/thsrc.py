@@ -341,8 +341,12 @@ class THSRC(BaseService):
                 })
 
         if not trains:
-            self.logger.info(
-                '\nThere is no trains left on %s, please reserve other day!', self.outbound_date)
+            if self.outbound_time:
+                self.logger.info(
+                    '\nThere is no trains left on %s before %s, please reserve different outbound time!', self.outbound_date, self.outbound_time)
+            else:
+                self.logger.info(
+                    '\nThere is no trains left on %s, please reserve other day!', self.outbound_date)
             sys.exit(0)
 
         self.logger.info('\nSelect train:')

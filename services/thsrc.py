@@ -105,6 +105,11 @@ class THSRC(BaseService):
     def select_time(self, outbound_date: str, default_value: int = 10) -> str:
         """Select time"""
 
+        if datetime.strptime(self.fields['inbound-time'], '%H:%M').time() <= datetime.strptime(self.fields['outbound-time'], '%H:%M').time():
+            self.logger.error(
+                "\nInbound time must be later than outbound time!")
+            sys.exit(1)
+
         if not self.fields['outbound-time']:
             self.logger.info('\nSelect outbound time:')
             for idx, t_str in enumerate(self.config['available-timetable'], start=1):

@@ -4,3 +4,4 @@ orjson
 requests
 rtoml
 validators
+pyperclip

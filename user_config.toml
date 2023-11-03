@@ -27,12 +27,13 @@ train-no = ''       # Train No. 車次 (e.g. 001)
 email = ''          # E-mail for notification
 phone = ''          # Phone number for SMS notification 手機號碼
 tgo-id = ''         # TSHRC member ID TGO會員ID (e.g. AXXXXXXXXX)
+tax-id = ''         # Government Uniform Invoice number 統一編號 (e.g. 00000000)
 
 [fields.THSRC.ticket]
 adult = 1    # 全票
 child = 0    # 孩童票 (6-11)
 disabled = 0 # 愛心票
-elder = 0    # 敬老票
+elder = 0    # 敬老票 (65+)
 college = 0  # 大學生票
 
 [proxies]

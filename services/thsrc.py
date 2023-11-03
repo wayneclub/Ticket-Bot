@@ -1,6 +1,3 @@
-#!/usr/bin/python3
-# coding: utf-8
-
 """
 This module is to buy tickets form THSRC
 """

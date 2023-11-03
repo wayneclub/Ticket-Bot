@@ -1,8 +1,5 @@
-#!/usr/bin/python3
-# coding: utf-8
-
 """
-This module is default service
+This module is base service
 """
 from __future__ import annotations
 import ssl

@@ -102,7 +102,7 @@ class THSRC(BaseService):
     def select_time(self, outbound_date: str, default_value: int = 10) -> str:
         """Select time"""
 
-        if datetime.strptime(self.fields['inbound-time'], '%H:%M').time() <= datetime.strptime(self.fields['outbound-time'], '%H:%M').time():
+        if self.fields['inbound-time'] and datetime.strptime(self.fields['inbound-time'], '%H:%M').time() <= datetime.strptime(self.fields['outbound-time'], '%H:%M').time():
             self.logger.error(
                 "\nInbound time must be later than outbound time!")
             sys.exit(1)
@@ -470,10 +470,10 @@ class THSRC(BaseService):
                 'value': '愛心票'
             },
         )
-        for disabled in disableds:
+        for disabled, disabled_id in zip(disableds, self.fields['ids']['disabled']):
             data[disabled.attrs['name']] = disabled.attrs['value']
             data[disabled.attrs['name'].replace(
-                'passengerDataTypeName', 'passengerDataIdNumber')] = input("\nInput disabled id: ")
+                'passengerDataTypeName', 'passengerDataIdNumber')] = disabled_id.strip() or input("\nInput disabled id: ")
 
         elders = html_page.find_all(
             'input',
@@ -481,10 +481,10 @@ class THSRC(BaseService):
                 'value': '敬老票'
             },
         )
-        for elder in elders:
+        for elder, elder_id in zip(elders, self.fields['ids']['elder']):
             data[elder.attrs['name']] = elder.attrs['value']
             data[elder.attrs['name'].replace(
-                'passengerDataTypeName', 'passengerDataIdNumber')] = input("\nInput elder id: ")
+                'passengerDataTypeName', 'passengerDataIdNumber')] = elder_id.strip() or input("\nInput elder id: ")
 
         res = self.session.post(
             self.config['api']['submit'].format(interface=interface),

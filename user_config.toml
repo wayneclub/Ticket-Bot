@@ -36,6 +36,10 @@ disabled = 0 # 愛心票
 elder = 0    # 敬老票 (65+)
 college = 0  # 大學生票
 
+[fields.THSRC.ids]
+disabled = [''] # Disabled ID No. 愛心票身分證字號 (e.g. AXXXXXXXXX)
+elder = ['']    # Elder ID No. 敬老票身分證字號 (e.g. AXXXXXXXXX)
+
 [proxies]
 # This is a dictionary of proxies you wish to use on services that require a specific country IP.
 # The dictionary key needs to be an alpha 2 country code (2-letter code, e.g. `us`, `gb`, `jp`, `de`).

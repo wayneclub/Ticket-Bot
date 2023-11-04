@@ -22,7 +22,7 @@ pip install -r requriements
 
 ## USAGE
 
-### Online **_(Colab environment is in the US, if you want to use in other region please execute on local)_**
+### Online **_(Colab environment is in the US, if you want to use it in another region please execute it locally)_**
 
 1. Save a copy in Drive
 2. Connect Colab

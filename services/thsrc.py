@@ -40,7 +40,7 @@ class THSRC(BaseService):
         for error_text in page.find_all(class_='feedbackPanelERROR'):
             error_message = error_text.text.strip()
             self.logger.error('Error: %s', error_message)
-            if '售完' in error_message or '選擇的日期超過目前開放預訂之日期' in error_message or '請選擇' in error_message:
+            if '選擇的日期超過目前開放預訂之日期' in error_message or '請選擇' in error_message:
                 sys.exit(0)
 
     def get_station(self, station_name):

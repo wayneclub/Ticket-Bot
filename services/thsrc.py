@@ -502,7 +502,7 @@ class THSRC(BaseService):
 
     def print_result(self, html_page):
         """4. Print result"""
-
+        self.logger.debug("\nSaving booking log...", html_page.text)
         reservation_no = html_page.find(
             'p', class_='pnr-code').get_text(strip=True)
         payment_status = html_page.find(

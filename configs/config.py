@@ -7,7 +7,7 @@ This module is for default setting.
 from __future__ import annotations
 from pathlib import Path
 from typing import Any
-import rtoml
+import pytomlpp
 
 app_name = "Ticket-Bot"
 __version__ = "1.0.0"
@@ -34,7 +34,7 @@ class Config:
         if not path.is_file():
             raise FileNotFoundError(
                 f"Config file path ({path}) is not to a file.")
-        return cls(**rtoml.load(path))
+        return cls(**pytomlpp.load(path))
 
 
 class Directories:

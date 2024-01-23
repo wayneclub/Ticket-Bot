@@ -2,6 +2,6 @@ lxml
 beautifulsoup4
 orjson
 requests
-rtoml
+pytomlpp
 validators
 pyperclip

@@ -6,7 +6,7 @@ from __future__ import annotations
 import logging
 from typing import Union
 from pathlib import Path
-import rtoml
+import pytomlpp
 
 
 def load_toml(path: Union[Path, str]) -> dict:
@@ -16,7 +16,7 @@ def load_toml(path: Union[Path, str]) -> dict:
         path = Path(path)
     if not path.is_file():
         return {}
-    return rtoml.load(path)
+    return pytomlpp.load(path)
 
 
 if __name__:
